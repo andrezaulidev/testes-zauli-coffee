@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zauli's Coffee — cafés especiais torrados artesanalmente. Compre grãos, moído e cápsulas com entrega e atendimento via WhatsApp.">
     <title>Zauli's Coffee | Sabor da Roça em cada xícara!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -10,6 +11,15 @@
     <link rel="icon" type="image/x-icon" href="fotos/logo.png">
 </head>
 <body>
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('theme');
+                var useDark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (useDark) document.body.classList.add('dark-theme');
+            } catch (e) {}
+        })();
+    </script>
     <!-- Header e Navegação -->
     <header class="header">
         <div class="container">
@@ -19,10 +29,10 @@
                     <span>Zauli's Coffee</span>
                 </a>
                 
-                <button class="menu-toggle" id="menuToggle">
+                <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="navMenu">
                     <i class="fas fa-bars"></i>
                 </button>
-                <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema">
                     <i class="fas fa-moon"></i>
                 </button>
                 
@@ -221,9 +231,9 @@
                     <span>Total:</span>
                     <span id="cartTotal">R$ 0,00</span>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-primary" id="checkoutButton" style="flex: 1;">Finalizar Compra</button>
-                    <button class="btn btn-secondary" id="clearCartButton" style="flex: 1;">Limpar</button>
+                <div class="cart-actions">
+                    <button class="btn btn-primary" id="checkoutButton" type="button">Finalizar Compra</button>
+                    <button class="btn btn-secondary" id="clearCartButton" type="button">Limpar</button>
                 </div>
             </div>
         </div>
@@ -248,8 +258,8 @@
                     <div class="product-modal-price" id="productModalPrice"></div>
                     <label for="productModalQty">Quantidade</label>
                     <input type="number" id="productModalQty" value="1" min="1">
-                    <div style="margin-top:12px;">
-                        <button class="btn btn-primary" id="productModalAdd">Adicionar ao carrinho</button>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" id="productModalAdd" type="button">Adicionar ao carrinho</button>
                     </div>
                 </div>
             </div>
@@ -276,7 +286,7 @@
                         <label for="checkoutReference">Complemento ou referência</label>
                         <input type="text" id="checkoutReference" placeholder="Apto, ponto de referência, bloco, etc.">
                         
-                        <div style="margin-top:12px;">
+                        <div class="form-actions">
                             <button class="btn btn-primary" type="submit">Enviar Pedido</button>
                         </div>
                     </form>
@@ -291,6 +301,6 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

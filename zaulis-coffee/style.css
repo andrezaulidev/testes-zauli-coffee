@@ -43,7 +43,7 @@ body.dark-theme {
     --primary-color: #B07A4A;       /* Caramelo/latte */
     --secondary-color: #8A5A3C;     /* Cobre */
     --accent-color: #D8B48A;        /* Bege café */
-    --dark-color: #FFF6EA;          /* (legado) usado em títulos: manter claro */
+    --dark-color: #4A2511;          /* legado: títulos usam --heading no dark */
     --light-color: #0F0C0A;         /* (legado) fundo espresso */
     --text-color: #F3EFE6;          /* Texto claro */
     --white: #FFFFFF;               /* NÃO inverter no dark (evita texto escuro em botões/rodapé) */
@@ -117,7 +117,7 @@ h1, h2, h3, h4 {
 
 .section-title {
     font-size: 2.5rem;
-    color: var(--dark-color);
+    color: var(--heading);
     margin-bottom: 15px;
     transition: color 0.3s ease;
 }
@@ -185,7 +185,7 @@ h1, h2, h3, h4 {
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: var(--dark-color);
+    color: var(--heading);
     font-size: 1.8rem;
     font-weight: 700;
     transition: color 0.3s ease;
@@ -260,7 +260,7 @@ h1, h2, h3, h4 {
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: var(--dark-color);
+    color: var(--heading);
     cursor: pointer;
     transition: color 0.3s ease;
 }
@@ -270,7 +270,7 @@ h1, h2, h3, h4 {
     background: none;
     border: none;
     font-size: 1.1rem;
-    color: var(--dark-color);
+    color: var(--heading);
     cursor: pointer;
     width: 40px;
     height: 40px;
@@ -296,7 +296,7 @@ body.dark-theme .theme-toggle {
 
 body.dark-theme .theme-toggle:hover {
     background-color: var(--accent-color);
-    color: var(--dark-color);
+    color: var(--bg);
 }
 
 /* Hero Section */
@@ -322,7 +322,7 @@ body.dark-theme .theme-toggle:hover {
 
 .hero-title {
     font-size: 3.5rem;
-    color: var(--dark-color);
+    color: var(--heading);
     margin-bottom: 20px;
     transition: color 0.3s ease;
 }
@@ -392,7 +392,7 @@ body.dark-theme .theme-toggle:hover {
 
 .product-title {
     font-size: 1.4rem;
-    color: var(--dark-color);
+    color: var(--heading);
     margin-bottom: 10px;
     transition: color 0.3s ease;
 }
@@ -439,7 +439,7 @@ body.dark-theme .theme-toggle:hover {
 
 .add-to-cart {
     background-color: var(--accent-color);
-    color: var(--dark-color);
+    color: var(--heading);
     border: none;
     width: 40px;
     height: 40px;
@@ -526,7 +526,7 @@ body.dark-theme .theme-toggle:hover {
 
 .feature h4 {
     font-size: 1.1rem;
-    color: var(--dark-color);
+    color: var(--heading);
     transition: color 0.3s ease;
 }
 
@@ -570,7 +570,7 @@ body.dark-theme .theme-toggle:hover {
 
 .testimonial-author h4 {
     font-size: 1.3rem;
-    color: var(--dark-color);
+    color: var(--heading);
     margin-bottom: 5px;
     transition: color 0.3s ease;
 }
@@ -869,7 +869,7 @@ body.dark-theme .theme-toggle:hover {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 20px;
-    color: var(--dark-color);
+    color: var(--heading);
     transition: color 0.3s ease;
 }
 
@@ -1014,4 +1014,130 @@ body.dark-theme select:-webkit-autofill {
 .toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+/* Utilitários */
+.cart-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.cart-actions .btn {
+    flex: 1;
+}
+
+.form-actions {
+    margin-top: 12px;
+}
+
+/* WhatsApp flutuante */
+.whatsapp-float {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #25d366;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 1500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatsapp-float:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+    .hero-title {
+        font-size: 2.75rem;
+    }
+
+    .product-modal-body {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-menu {
+        position: fixed;
+        top: 72px;
+        left: 0;
+        width: 100%;
+        flex-direction: column;
+        background-color: var(--surface);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        gap: 0;
+        transform: translateY(-120%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .nav-menu li {
+        margin: 0;
+        width: 100%;
+    }
+
+    .nav-menu a {
+        display: block;
+        padding: 12px 0;
+    }
+
+    .hero .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-content {
+        padding-right: 0;
+        margin-bottom: 30px;
+    }
+
+    .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .section-padding {
+        padding: 60px 0;
+    }
+
+    .cart-modal {
+        max-width: 100%;
+    }
+
+    .whatsapp-float {
+        right: 16px;
+        bottom: 16px;
+        width: 52px;
+        height: 52px;
+    }
 }

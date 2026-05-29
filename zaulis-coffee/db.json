@@ -2,12 +2,46 @@
   "products": [
     {
       "id": 1,
-      "nome": "Café Especial Blend Brasil",
-      "descricao": "Blend exclusivo de grãos brasileiros com notas de chocolate",
-      "preco": 24.90,
-      "imagem": "https://images.unsplash.com/photo-1587734195503-904137cec4e6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      "categoria": "grãos",
-      "estoque": 50
+      "nome": "Café Torrado (em grãos) - 500g",
+      "descricao": "Café torrado em grãos, perfeito para moer na hora e preservar o sabor fresco",
+      "preco": 45,
+      "imagem": "fotos/cafe.png"
+    },
+    {
+      "id": 2,
+      "nome": "Café Torrado (em grãos) - 1kg",
+      "descricao": "Café torrado em grãos, perfeito para moer na hora e preservar o sabor fresco",
+      "preco": 90,
+      "imagem": "fotos/cafe.png"
+    },
+    {
+      "id": 3,
+      "nome": "Café Torrado (Moído) - 500g",
+      "descricao": "Café torrado e moído, perfeito para sua xícara diária",
+      "preco": 45,
+      "imagem": "fotos/cafe.png"
+    },
+    {
+      "id": 4,
+      "nome": "Café Torrado (Moído) - 1kg",
+      "descricao": "Café torrado e moído, perfeito para sua xícara diária",
+      "preco": 90,
+      "imagem": "fotos/cafe.png"
+    },
+    {
+      "id": 5,
+      "nome": "Cápsulas para Máquinas de cápsulas - 8 unidades",
+      "descricao": "Cápsulas compatíveis com máquinas de café expresso, para uma preparação rápida e prática",
+      "preco": 40,
+      "imagem": "fotos/capsulas.png"
+    },
+    {
+      "id": 6,
+      "nome": "Kit Café Torrado Moído e em grãos - 1kg cada",
+      "descricao": "Kit com 1kg de café torrado em grãos e 1kg de café torrado moído, para você escolher como prefere preparar",
+      "preco": 165,
+      "precoOriginal": 200,
+      "imagem": "fotos/cafes.png"
     }
   ],
   "orders": [],
