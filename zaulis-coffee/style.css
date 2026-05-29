@@ -28,6 +28,13 @@
     --btn-text: var(--light-color);
     --btn-bg-hover: #3A241A;
     --btn-border-hover: #D8B48A;
+
+    /* Footer */
+    --footer-bg: #2B1A13;
+    --footer-text: #F9F5F0;
+    --footer-link: #C1B3A0;
+    --footer-link-hover: #FFF6EA;
+    --footer-border: rgba(255, 255, 255, 0.1);
 }
 
 /* Dark theme overrides */
@@ -59,6 +66,13 @@ body.dark-theme {
     --btn-text: var(--text);
     --btn-bg-hover: var(--surface-2);
     --btn-border-hover: var(--accent-color);
+
+    /* Footer (não usar --dark-color: no dark ele é cor de título clara) */
+    --footer-bg: #0A0806;
+    --footer-text: var(--text);
+    --footer-link: var(--text-muted);
+    --footer-link-hover: var(--heading);
+    --footer-border: rgba(255, 239, 220, 0.10);
 }
 
 * {
@@ -614,10 +628,14 @@ body.dark-theme .theme-toggle:hover {
 
 /* Footer */
 .footer {
-    background-color: var(--dark-color);
-    color: var(--white);
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
     padding: 60px 0 20px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.footer .logo {
+    color: var(--footer-text);
 }
 
 .footer-content {
@@ -643,13 +661,13 @@ body.dark-theme .theme-toggle:hover {
 }
 
 .footer-col ul li a {
-    color: #C1B3A0;
+    color: var(--footer-link);
     text-decoration: none;
     transition: var(--transition);
 }
 
 .footer-col ul li a:hover {
-    color: #F9F5F0;
+    color: var(--footer-link-hover);
     padding-left: 5px;
 }
 
@@ -701,8 +719,8 @@ body.dark-theme .theme-toggle:hover {
 .footer-bottom {
     text-align: center;
     padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    color: #C1B3A0;
+    border-top: 1px solid var(--footer-border);
+    color: var(--footer-link);
     font-size: 0.9rem;
 }
 
