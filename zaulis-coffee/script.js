@@ -586,7 +586,6 @@ async function init() {
     // Inicializar slider de depoimentos
     initTestimonials();
     
-    // Carregar produtos da API (se necessário)
     /*
     try {
         const res = await fetch('/api/products');
