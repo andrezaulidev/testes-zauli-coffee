@@ -7,8 +7,8 @@
     <title>Zauli's Coffee | Sabor da Roça em cada xícara!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/x-icon" href="fotos/logo.png">
+    <link rel="stylesheet" href="zaulis-coffee/style.css">
+    <link rel="icon" type="image/x-icon" href="zaulis-coffee/fotos/logo.png">
 </head>
 <body>
     <script>
@@ -25,7 +25,7 @@
         <div class="container">
             <nav class="navbar">
                 <a href="index.html" class="logo">
-                    <img src="fotos/logo2.png" alt="Zauli's Coffee Logo" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
+                    <img src="zaulis-coffee/fotos/logo2.png" alt="Zauli's Coffee Logo" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;">
                     <span>Zauli's Coffee</span>
                 </a>
                 
@@ -62,7 +62,7 @@
                 <a href="#products" class="btn btn-primary">Explorar Cafés</a>
             </div>
             <div class="hero-image">
-                <img src="fotos/logo.png" alt="Café especial" loading="lazy" decoding="async">
+                <img src="zaulis-coffee/fotos/logo.png" alt="Logo da Zauli's Coffee - marca de café especial artesanal" loading="lazy" decoding="async">
             </div>
         </div>
     </section>
@@ -86,7 +86,7 @@
         <div class="container">
             <div class="about-content">
                 <div class="about-image">
-                    <img src="fotos/cafe_grao.png" alt="Grãos de café" loading="lazy" decoding="async">
+                    <img src="zaulis-coffee/fotos/cafe_grao.png" alt="Grãos de café torrado da Zauli's Coffee" loading="lazy" decoding="async">
                 </div>
                 <div class="about-text">
                     <h2 class="section-title">Nossa História</h2>
@@ -148,13 +148,13 @@
                     </div>
                 </div>
                 <div class="slider-controls">
-                    <button class="slider-btn prev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="slider-btn prev" aria-label="Depoimento anterior"><i class="fas fa-chevron-left"></i></button>
                     <div class="slider-dots">
                         <span class="dot active"></span>
                         <span class="dot"></span>
                         <span class="dot"></span>
                     </div>
-                    <button class="slider-btn next"><i class="fas fa-chevron-right"></i></button>
+                    <button class="slider-btn next" aria-label="Próximo depoimento"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
@@ -255,7 +255,7 @@
                     <p id="productModalDesc"></p>
                     <div class="product-modal-price" id="productModalPrice"></div>
                     <label for="productModalQty">Quantidade</label>
-                    <input type="number" id="productModalQty" value="1" min="1">
+                    <input type="number" id="productModalQty" value="1" min="1" max="100">
                     <div class="form-actions">
                         <button class="btn btn-primary" id="productModalAdd" type="button">Adicionar ao carrinho</button>
                     </div>
@@ -275,8 +275,11 @@
                         <label for="checkoutName">Nome completo</label>
                         <input type="text" id="checkoutName" required>
                         
+                        <label for="checkoutEmail">Email</label>
+                        <input type="email" id="checkoutEmail" required>
+                        
                         <label for="checkoutPhone">Telefone (WhatsApp)</label>
-                        <input type="text" id="checkoutPhone" required>
+                        <input type="tel" id="checkoutPhone" pattern="[0-9]{10,11}" placeholder="(11) 91234-5678" required>
                         
                         <label for="checkoutAddress">Endereço</label>
                         <input type="text" id="checkoutAddress" required>
@@ -299,6 +302,6 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <script src="script.js" defer></script>
+    <script src="zaulis-coffee/script.js" defer></script>
 </body>
 </html>

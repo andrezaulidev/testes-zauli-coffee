@@ -256,6 +256,30 @@ function setModalOpen(isOpen) {
     document.body.classList.toggle('modal-open', isOpen);
 }
 
+function setupFocusTrap(modal) {
+    const focusableElements = modal.querySelectorAll(
+        'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    const handleKeyDown = (e) => {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey && document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+        }
+    };
+
+    modal.addEventListener('keydown', handleKeyDown);
+    modal._focusTrapHandler = handleKeyDown;
+}
+
 function openCartModal() {
     if (!cartModal) return;
     cartModal.classList.add('active');
@@ -289,6 +313,9 @@ function openProductModal(id) {
     currentModalProductId = id;
 
     productModal.setAttribute('aria-hidden', 'false');
+    productModal.tabIndex = -1;
+    setupFocusTrap(productModal);
+    productModal.focus();
     setModalOpen(true);
 }
 
@@ -299,6 +326,9 @@ function closeProductModal() {
 }
 
 function openCheckoutModal() {
+    checkoutModal.tabIndex = -1;
+    setupFocusTrap(checkoutModal);
+    checkoutModal.focus();
     if (!checkoutModal) return;
     checkoutModal.style.display = 'flex';
     checkoutModal.setAttribute('aria-hidden', 'false');
@@ -415,7 +445,7 @@ function toggleTheme() {
 
 async function loadProducts() {
     try {
-        const response = await fetch('db.json', { cache: 'no-store' });
+        const response = await fetch('./db.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('Falha ao carregar produtos');
 
         const data = await response.json();
@@ -512,7 +542,7 @@ function bindEvents() {
         const produto = produtos.find((p) => p.id === id);
         if (!produto) return;
 
-        const qty = Math.max(1, Number(productModalQty?.value) || 1);
+        const qty = Math.max(1, Math.min(100, Number(productModalQty?.value) || 1));
         addToCart(id, produto.nome, produto.preco, produto.imagem, qty);
         closeProductModal();
     });
@@ -526,6 +556,7 @@ function bindEvents() {
         e.preventDefault();
 
         const name = document.getElementById('checkoutName')?.value.trim() || '';
+        const email = document.getElementById('checkoutEmail')?.value.trim() || '';
         const phone = document.getElementById('checkoutPhone')?.value.trim() || '';
         const address = document.getElementById('checkoutAddress')?.value.trim() || '';
         const reference = document.getElementById('checkoutReference')?.value.trim() || '';
@@ -535,17 +566,30 @@ function bindEvents() {
             return;
         }
 
-        if (!name || !phone || !address) {
+        if (!name || !email || !phone || !address) {
             showToast('Por favor, preencha todos os campos obrigatórios');
+            return;
+        }
+
+        // Validar telefone (10-11 dígitos)
+        const cleanPhone = phone.replace(/\D/g, '');
+        const phoneRegex = /^\d{10,11}$/;
+        if (!phoneRegex.test(cleanPhone)) {
+            showToast('Telefone deve ter 10 ou 11 dígitos');
+            return;
+        }
+
+        // Validar email básico
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showToast('Email inválido');
             return;
         }
 
         const message = buildWhatsAppMessage({ name, phone, address, reference });
 
-        resetCart();
         closeCheckoutModal();
         closeCartModal();
-        checkoutForm.reset();
 
         window.open(
             `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
@@ -553,6 +597,8 @@ function bindEvents() {
             'noopener,noreferrer'
         );
 
+        resetCart();
+        checkoutForm.reset();
         showToast('Pedido enviado com sucesso!');
     });
 
