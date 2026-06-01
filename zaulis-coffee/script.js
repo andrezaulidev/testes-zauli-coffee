@@ -97,7 +97,9 @@ function resolveImagePath(imagem) {
     if (/^(https?:)?\/\//.test(imagem)) {
         return imagem;
     }
-    return imagem.replace(/^\/+/, '').replace(/^\.\//, '');
+    const normalized = imagem.replace(/^(?:\.\/|\/)+/, '');
+    const prefixed = normalized.startsWith('zaulis-coffee/') ? normalized : `zaulis-coffee/${normalized}`;
+    return `./${prefixed}`;
 }
 
 function getCartTotal() {
