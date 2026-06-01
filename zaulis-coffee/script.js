@@ -94,13 +94,16 @@ function formatCurrency(value) {
 
 function resolveImagePath(imagem) {
     if (!imagem || typeof imagem !== 'string') return imagem;
-    if (imagem.startsWith('http://') || imagem.startsWith('https://') || imagem.startsWith('/')) {
+    if (imagem.startsWith('http://') || imagem.startsWith('https://')) {
+        return imagem;
+    }
+    if (imagem.startsWith('/')) {
         return imagem;
     }
     if (imagem.startsWith('zaulis-coffee/')) {
-        return imagem;
+        return `/${imagem}`;
     }
-    return `zaulis-coffee/${imagem.replace(/^\//, '')}`;
+    return `/zaulis-coffee/${imagem.replace(/^\//, '')}`;
 }
 
 function getCartTotal() {
