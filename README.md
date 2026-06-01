@@ -185,7 +185,7 @@ PORT=5000 npm start
 
 ## 📝 TODO
 
-- [ ] Sistema de pagamento (Stripe/PayPal)
+- [ ] Sistema de pagamento via WhatsApp
 - [ ] Autenticação de usuário
 - [ ] Histórico de pedidos
 - [ ] Newsletter

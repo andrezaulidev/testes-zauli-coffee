@@ -272,69 +272,26 @@
                 <div class="product-modal-info">
                     <h3 id="checkoutTitle">Finalizar Compra</h3>
                     
-                    <!-- Abas de método de pagamento -->
-                    <div class="payment-tabs">
-                        <button type="button" class="tab-btn active" data-tab="whatsapp">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                        </button>
-                        <button type="button" class="tab-btn" data-tab="stripe">
-                            <i class="fas fa-credit-card"></i> Cartão (Stripe)
-                        </button>
-                    </div>
-
-                    <!-- Tab WhatsApp (padrão) -->
-                    <div id="whatsapp-tab" class="payment-tab active">
-                        <form id="checkoutForm">
-                            <label for="checkoutName">Nome completo</label>
-                            <input type="text" id="checkoutName" required>
-                            
-                            <label for="checkoutEmail">Email</label>
-                            <input type="email" id="checkoutEmail" required>
-                            
-                            <label for="checkoutPhone">Telefone (WhatsApp)</label>
-                            <input type="tel" id="checkoutPhone" pattern="[0-9]{10,11}" placeholder="(11) 91234-5678" required>
-                            
-                            <label for="checkoutAddress">Endereço</label>
-                            <input type="text" id="checkoutAddress" required>
-                            
-                            <label for="checkoutReference">Complemento ou referência</label>
-                            <input type="text" id="checkoutReference" placeholder="Apto, ponto de referência, bloco, etc.">
-                            
-                            <div class="form-actions">
-                                <button class="btn btn-primary" type="submit">Enviar Pedido via WhatsApp</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Tab Stripe -->
-                    <div id="stripe-tab" class="payment-tab">
-                        <form id="stripeCheckoutForm">
-                            <label for="stripeCustomerName">Nome completo</label>
-                            <input type="text" id="stripeCustomerName" required>
-                            
-                            <label for="stripeCustomerEmail">Email</label>
-                            <input type="email" id="stripeCustomerEmail" required>
-                            
-                            <label for="stripeCustomerPhone">Telefone</label>
-                            <input type="tel" id="stripeCustomerPhone" pattern="[0-9]{10,11}" placeholder="(11) 91234-5678" required>
-                            
-                            <label for="stripeCustomerAddress">Endereço</label>
-                            <input type="text" id="stripeCustomerAddress" required>
-                            
-                            <label for="stripeCustomerReference">Complemento (opcional)</label>
-                            <input type="text" id="stripeCustomerReference" placeholder="Apto, bloco, etc.">
-                            
-                            <label>Dados do Cartão</label>
-                            <div id="card-element" class="stripe-element"></div>
-                            <div id="card-errors" class="error-message"></div>
-                            
-                            <div class="form-actions">
-                                <button class="btn btn-primary" id="stripeSubmitBtn" type="submit">Pagar com Cartão</button>
-                            </div>
-                        </form>
+                    <form id="checkoutForm">
+                        <label for="checkoutName">Nome completo</label>
+                        <input type="text" id="checkoutName" required>
                         
-                        <div id="payment-status" class="payment-status hidden"></div>
-                    </div>
+                        <label for="checkoutEmail">Email</label>
+                        <input type="email" id="checkoutEmail" required>
+                        
+                        <label for="checkoutPhone">Telefone (WhatsApp)</label>
+                        <input type="tel" id="checkoutPhone" pattern="[0-9]{10,11}" placeholder="(11) 91234-5678" required>
+                        
+                        <label for="checkoutAddress">Endereço</label>
+                        <input type="text" id="checkoutAddress" required>
+                        
+                        <label for="checkoutReference">Complemento ou referência</label>
+                        <input type="text" id="checkoutReference" placeholder="Apto, ponto de referência, bloco, etc.">
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-primary" type="submit">Enviar Pedido via WhatsApp</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -346,8 +303,6 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Stripe.js -->
-    <script src="https://js.stripe.com/v3/"></script>
     <script src="zaulis-coffee/script.js" defer></script>
 </body>
 </html>

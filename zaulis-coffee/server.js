@@ -73,7 +73,7 @@ app.get('/api/products', (req, res) => {
 
 // API: checkout - armazenar em memória
 app.post('/api/checkout', checkoutLimiter, (req, res) => {
-    const { cart, customer, paymentMethod, paymentType } = req.body || {};
+    const { cart, customer } = req.body || {};
 
     // Validação
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
@@ -119,21 +119,17 @@ app.post('/api/checkout', checkoutLimiter, (req, res) => {
         customer,
         createdAt,
         items: cart,
-        paymentType: paymentType || 'whatsapp', // 'whatsapp' ou 'stripe'
-        paymentMethod: paymentMethod || null,
-        status: paymentType === 'stripe' ? 'processing' : 'pending'
+        status: 'pending'
     };
 
     orders.push(order);
 
-    console.log(`📦 Novo pedido #${id} - ${paymentType === 'stripe' ? 'Cartão' : 'WhatsApp'} - Total: R$ ${total.toFixed(2)}`);
+    console.log(`📦 Novo pedido #${id} - Total: R$ ${total.toFixed(2)}`);
 
     res.json({
         success: true,
         orderId: id,
-        message: paymentType === 'stripe' 
-            ? 'Pagamento recebido! Confirmando seu pedido...'
-            : 'Pedido recebido! Aguardando confirmação via WhatsApp.'
+        message: 'Pedido recebido! Aguardando confirmação via WhatsApp.'
     });
 });
 

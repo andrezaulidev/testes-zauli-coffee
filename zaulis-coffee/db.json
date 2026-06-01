@@ -37,11 +37,11 @@
     },
     {
       "id": 6,
-      "nome": "Kit Café Torrado Moído e em grãos - 1kg cada",
-      "descricao": "Kit com 1kg de café torrado em grãos e 1kg de café torrado moído, para você escolher como prefere preparar",
-      "preco": 165,
-      "precoOriginal": 200,
-      "imagem": "fotos/cafes.png"
+      "nome": "Kit 5 pacotes de Café Torrado Moído - 1kg cada",
+      "descricao": "Kit com 5kg de café torrado em grãos, para se ",
+      "preco": 190.0,
+      "precoOriginal": 225.0,
+      "imagem": "zaulis-coffee/fotos/cafes.png"
     }
   ],
   "orders": [],
