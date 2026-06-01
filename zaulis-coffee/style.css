@@ -191,6 +191,15 @@ h1, h2, h3, h4 {
     transition: color 0.3s ease;
 }
 
+.logo img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 14px;
+    display: block;
+}
+
 .logo i {
     color: var(--primary-color);
     margin-right: 10px;
@@ -1144,4 +1153,3 @@ body.modal-open {
         height: 52px;
     }
 }
-
