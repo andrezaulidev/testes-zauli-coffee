@@ -337,11 +337,14 @@ body.dark-theme .theme-toggle:hover {
 
 .hero-image {
     flex: 1;
-    min-width: 300px;
+    min-width: 260px;
+    max-width: 360px;
 }
 
 .hero-image img {
     width: 100%;
+    max-width: 360px;
+    height: auto;
     border-radius: 10px;
     box-shadow: var(--shadow);
     display: block;
