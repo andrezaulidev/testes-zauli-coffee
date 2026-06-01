@@ -1,11 +1,17 @@
 const CART_STORAGE_KEY = 'carrinho';
 const WHATSAPP_NUMBER = '5511911245236';
+const STRIPE_PUBLIC_KEY = 'pk_test_sua_chave_publica_aqui'; // Substituir pela chave pública real
 const TOAST_DURATION_MS = 3000;
 
 let produtos = [];
 let carrinho = loadCart();
 let currentModalProductId = null;
 let toastTimeoutId = null;
+
+// Stripe Elements
+let stripe = null;
+let elements = null;
+let cardElement = null;
 
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
@@ -31,6 +37,7 @@ const productModalAdd = document.getElementById('productModalAdd');
 const checkoutModal = document.getElementById('checkoutModal');
 const closeCheckout = document.getElementById('closeCheckout');
 const checkoutForm = document.getElementById('checkoutForm');
+const stripeCheckoutForm = document.getElementById('stripeCheckoutForm');
 const themeToggle = document.getElementById('themeToggle');
 
 const produtosMock = [
@@ -445,7 +452,7 @@ function toggleTheme() {
 
 async function loadProducts() {
     try {
-        const response = await fetch('./db.json', { cache: 'no-store' });
+        const response = await fetch('./zaulis-coffee/db.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('Falha ao carregar produtos');
 
         const data = await response.json();
@@ -621,13 +628,228 @@ function bindEvents() {
     });
 }
 
+// ============================================
+// STRIPE INTEGRATION
+// ============================================
+
+function initStripe() {
+    // Inicializar Stripe apenas se a chave estiver configurada
+    if (STRIPE_PUBLIC_KEY === 'pk_test_sua_chave_publica_aqui') {
+        console.warn('⚠️  Stripe não configurado. Use sua chave pública real.');
+        return;
+    }
+
+    try {
+        stripe = Stripe(STRIPE_PUBLIC_KEY);
+        elements = stripe.elements();
+        setupStripeElement();
+        setupPaymentTabs();
+    } catch (error) {
+        console.error('Erro ao inicializar Stripe:', error);
+    }
+}
+
+function setupStripeElement() {
+    const cardElementContainer = document.getElementById('card-element');
+    if (!cardElementContainer) return;
+
+    const style = {
+        base: {
+            fontSize: '16px',
+            fontFamily: '"Roboto", sans-serif',
+            color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
+            '::placeholder': {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim()
+            }
+        },
+        invalid: {
+            color: '#e53935',
+            iconColor: '#e53935'
+        }
+    };
+
+    cardElement = elements.create('card', { style });
+    cardElement.mount('#card-element');
+
+    // Tratamento de erros
+    cardElement.addEventListener('change', (event) => {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+}
+
+function setupPaymentTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const paymentTabs = document.querySelectorAll('.payment-tab');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.getAttribute('data-tab');
+
+            // Remove active de todos os botões e abas
+            tabBtns.forEach(b => b.classList.remove('active'));
+            paymentTabs.forEach(tab => tab.classList.remove('active'));
+
+            // Adiciona active ao clicado
+            btn.classList.add('active');
+            document.getElementById(`${tabName}-tab`)?.classList.add('active');
+
+            // Reiniciar card element se voltando para stripe
+            if (tabName === 'stripe' && cardElement && !cardElement._parent) {
+                cardElement.mount('#card-element');
+            }
+        });
+    });
+}
+
+async function handleStripeSubmit(e) {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+        showToast('Stripe não está configurado');
+        return;
+    }
+
+    // Validar carrinho
+    if (carrinho.length === 0) {
+        showToast('Seu carrinho está vazio');
+        return;
+    }
+
+    // Validar campos
+    const name = document.getElementById('stripeCustomerName')?.value.trim();
+    const email = document.getElementById('stripeCustomerEmail')?.value.trim();
+    const phone = document.getElementById('stripeCustomerPhone')?.value.trim();
+    const address = document.getElementById('stripeCustomerAddress')?.value.trim();
+    const reference = document.getElementById('stripeCustomerReference')?.value.trim();
+
+    if (!name || !email || !phone || !address) {
+        showToast('Preencha todos os campos obrigatórios');
+        return;
+    }
+
+    // Validar telefone
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (!/^\d{10,11}$/.test(cleanPhone)) {
+        showToast('Telefone deve ter 10 ou 11 dígitos');
+        return;
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Email inválido');
+        return;
+    }
+
+    // Desabilitar botão
+    const submitBtn = document.getElementById('stripeSubmitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processando...';
+
+    try {
+        // Criar Payment Method
+        const { error, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: {
+                name: name,
+                email: email,
+                phone: cleanPhone,
+                address: {
+                    line1: address,
+                    line2: reference
+                }
+            }
+        });
+
+        if (error) {
+            document.getElementById('card-errors').textContent = error.message;
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+        }
+
+        // Enviar para servidor
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                cart: carrinho,
+                customer: {
+                    name,
+                    email,
+                    phone: cleanPhone,
+                    address,
+                    reference
+                },
+                paymentMethod: paymentMethod.id,
+                paymentType: 'stripe'
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Erro ao processar pagamento');
+        }
+
+        // Sucesso!
+        showPaymentStatus('success', `Pagamento processado! ID do pedido: ${result.orderId}`);
+        resetCart();
+        closeCheckoutModal();
+        closeCartModal();
+        stripeCheckoutForm.reset();
+
+        // Limpar card element
+        cardElement.clear();
+
+        setTimeout(() => {
+            document.getElementById('payment-status').classList.remove('show');
+        }, 5000);
+
+    } catch (error) {
+        showPaymentStatus('error', error.message || 'Erro ao processar pagamento');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+}
+
+function showPaymentStatus(type, message) {
+    const statusEl = document.getElementById('payment-status');
+    statusEl.className = `payment-status show ${type}`;
+
+    let icon = '';
+    if (type === 'success') {
+        icon = '<i class="fas fa-check-circle"></i>';
+    } else if (type === 'error') {
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+    } else if (type === 'loading') {
+        icon = '<span class="spinner"></span>';
+    }
+
+    statusEl.innerHTML = `${icon} ${message}`;
+}
+
 async function init() {
     initTheme();
+    initStripe();
     produtos = await loadProducts();
     renderProducts();
     updateCart();
     initTestimonials();
     bindEvents();
+    
+    // Setup Stripe form
+    stripeCheckoutForm?.addEventListener('submit', handleStripeSubmit);
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -13,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(compression());
 app.use(morgan('dev'));
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000', 'http://localhost:8080'],
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS']
 }));
@@ -50,140 +51,138 @@ app.use((req, res, next) => {
     next();
 });
 
-// SQLite setup
-const sqlite3 = require('sqlite3').verbose();
-const dbPath = path.join(__dirname, 'data.db');
-const db = new sqlite3.Database(dbPath);
+// Armazenamento em memória de pedidos
+let orders = [];
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    total REAL,
-    customer TEXT,
-    createdAt TEXT
-  )`);
-  db.run(`CREATE TABLE IF NOT EXISTS order_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id TEXT,
-    product_id INTEGER,
-    nome TEXT,
-    preco REAL,
-    quantidade INTEGER
-  )`);
-});
-
-// Produtos (carregados do db.json)
+// Carregar produtos do db.json
 let produtos = [];
 try {
-    const fs = require('fs');
-    const dbJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'db.json'), 'utf8'));
+    const dbJsonPath = path.join(__dirname, 'db.json');
+    const dbJson = JSON.parse(fs.readFileSync(dbJsonPath, 'utf8'));
     produtos = dbJson.products || [];
+    console.log(`✅ ${produtos.length} produtos carregados de db.json`);
 } catch (err) {
-    console.warn('Erro ao carregar db.json, usando array vazio:', err.message);
+    console.warn('⚠️  Erro ao carregar db.json:', err.message);
     produtos = [];
 }
 
 // API: get products
 app.get('/api/products', (req, res) => {
-  res.json(produtos.length > 0 ? produtos : []);
+    res.json(produtos.length > 0 ? produtos : []);
 });
 
-// API: checkout - persist to SQLite
+// API: checkout - armazenar em memória
 app.post('/api/checkout', checkoutLimiter, (req, res) => {
-  const { cart, customer } = req.body || {};
-  
-  // Validação
-  if (!cart || !Array.isArray(cart) || cart.length === 0) {
-    return res.status(400).json({ error: 'Carrinho vazio' });
-  }
-  
-  if (!customer || !customer.name || !customer.phone || !customer.address) {
-    return res.status(400).json({ error: 'Dados do cliente incompletos' });
-  }
-  
-  // Validar telefone
-  const cleanPhone = customer.phone.replace(/\D/g, '');
-  if (!/^\d{10,11}$/.test(cleanPhone)) {
-    return res.status(400).json({ error: 'Telefone inválido (10-11 dígitos)' });
-  }
-  
-  // Validar preços para evitar tampering
-  const validCart = cart.every(item => {
-    const realProd = produtos.find(p => p.id === item.id);
-    if (!realProd || Math.abs(realProd.preco - item.preco) > 0.01) {
-      return false;
+    const { cart, customer, paymentMethod, paymentType } = req.body || {};
+
+    // Validação
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+        return res.status(400).json({ error: 'Carrinho vazio' });
     }
-    return item.quantidade > 0 && item.quantidade <= 100;
-  });
-  
-  if (!validCart) {
-    return res.status(400).json({ error: 'Carrinho contém dados inválidos' });
-  }
-  
-  const id = String(Date.now());
-  const total = cart.reduce((s, it) => s + (it.preco * it.quantidade), 0);
-  const createdAt = new Date().toISOString();
 
-  db.serialize(() => {
-    const insertOrder = db.prepare('INSERT INTO orders (id, total, customer, createdAt) VALUES (?, ?, ?, ?)');
-    insertOrder.run(id, total, JSON.stringify(customer), createdAt, function(err) {
-      insertOrder.finalize();
-      if (err) return res.status(500).json({ error: 'Erro ao salvar pedido' });
-      
-      const insertItem = db.prepare('INSERT INTO order_items (order_id, product_id, nome, preco, quantidade) VALUES (?, ?, ?, ?, ?)');
-      let itemsProcessed = 0;
-      
-      cart.forEach((item, idx) => {
-        insertItem.run(id, item.id, item.nome, item.preco, item.quantidade, (err) => {
-          itemsProcessed++;
-          if (itemsProcessed === cart.length) {
-            insertItem.finalize();
-            res.json({ success: true, orderId: id });
-          }
-        });
-      });
+    if (!customer || !customer.name || !customer.phone || !customer.address) {
+        return res.status(400).json({ error: 'Dados do cliente incompletos' });
+    }
+
+    // Validar telefone
+    const cleanPhone = customer.phone.replace(/\D/g, '');
+    if (!/^\d{10,11}$/.test(cleanPhone)) {
+        return res.status(400).json({ error: 'Telefone inválido (10-11 dígitos)' });
+    }
+
+    // Validar email
+    if (!customer.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
+        return res.status(400).json({ error: 'Email inválido' });
+    }
+
+    // Validar preços para evitar tampering
+    const validCart = cart.every(item => {
+        const realProd = produtos.find(p => p.id === item.id);
+        if (!realProd || Math.abs(realProd.preco - item.preco) > 0.01) {
+            return false;
+        }
+        return item.quantidade > 0 && item.quantidade <= 100;
     });
-  });
+
+    if (!validCart) {
+        return res.status(400).json({ error: 'Carrinho contém dados inválidos' });
+    }
+
+    const id = String(Date.now());
+    const total = cart.reduce((s, it) => s + (it.preco * it.quantidade), 0);
+    const createdAt = new Date().toISOString();
+
+    // Salvar pedido em memória
+    const order = {
+        id,
+        total,
+        customer,
+        createdAt,
+        items: cart,
+        paymentType: paymentType || 'whatsapp', // 'whatsapp' ou 'stripe'
+        paymentMethod: paymentMethod || null,
+        status: paymentType === 'stripe' ? 'processing' : 'pending'
+    };
+
+    orders.push(order);
+
+    console.log(`📦 Novo pedido #${id} - ${paymentType === 'stripe' ? 'Cartão' : 'WhatsApp'} - Total: R$ ${total.toFixed(2)}`);
+
+    res.json({
+        success: true,
+        orderId: id,
+        message: paymentType === 'stripe' 
+            ? 'Pagamento recebido! Confirmando seu pedido...'
+            : 'Pedido recebido! Aguardando confirmação via WhatsApp.'
+    });
 });
 
-// API: get order (from DB)
+// API: get order (da memória)
 app.get('/api/orders/:id', (req, res) => {
-  const orderId = req.params.id;
-  
-  // Validar que o ID é um timestamp válido
-  if (!/^\d+$/.test(orderId)) {
-    return res.status(400).json({ error: 'ID de pedido inválido' });
-  }
-  
-  db.get('SELECT * FROM orders WHERE id = ?', [orderId], (err, row) => {
-    if (err) return res.status(500).json({ error: 'Erro ao consultar pedido' });
-    if (!row) return res.status(404).json({ error: 'Pedido não encontrado' });
-    
-    db.all('SELECT * FROM order_items WHERE order_id = ?', [orderId], (err2, items) => {
-      if (err2) return res.status(500).json({ error: 'Erro ao consultar itens' });
-      const order = { 
-        id: row.id, 
-        total: row.total, 
-        customer: JSON.parse(row.customer || '{}'), 
-        createdAt: row.createdAt, 
-        items: items || [] 
-      };
-      res.json(order);
-    });
-  });
+    const orderId = req.params.id;
+
+    // Validar que o ID é um timestamp válido
+    if (!/^\d+$/.test(orderId)) {
+        return res.status(400).json({ error: 'ID de pedido inválido' });
+    }
+
+    const order = orders.find(o => o.id === orderId);
+
+    if (!order) {
+        return res.status(404).json({ error: 'Pedido não encontrado' });
+    }
+
+    res.json(order);
 });
 
-// Payment: generate QR code for amount or order
-app.post('/api/payment/qr', async (req, res) => {
-  try {
-    // QR code generation removed - use external payment provider
-    res.status(501).json({ error: 'QR generation not available in this version' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao gerar QR code' });
-  }
+// Health check
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        produtos: produtos.length,
+        pedidos: orders.length
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint não encontrado' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('❌ Erro:', err);
+    res.status(500).json({
+        error: 'Erro interno do servidor',
+        message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 app.listen(PORT, () => {
-  console.log(`Zauli's demo server running on http://localhost:${PORT}`);
+    console.log(`\n☕ Zauli's Coffee Server rodando em http://localhost:${PORT}\n`);
+    console.log(`   Produtos: /api/products`);
+    console.log(`   Checkout: POST /api/checkout`);
+    console.log(`   Pedidos: GET /api/orders/:id`);
+    console.log(`   Health: GET /health\n`);
 });
